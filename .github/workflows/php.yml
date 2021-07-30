@@ -43,13 +43,19 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --ansi
 
-      - run: composer update drupal/core --with drupal/core:${{ matrix.drupal-versions }} -W --ansi
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-
-    # - name: Run test suite
-    #   run: composer run-script test
+      - run: composer update --with drupal/core:${{ matrix.drupal-versions }} --with drupal/core-dev:${{ matrix.drupal-versions }} -W --ansi
 
       - run: vendor/bin/phpcs --colors
       - run: vendor/bin/phpstan --no-progress --ansi
+
+      - name: Run test suite
+        if: ${{ matrix.drupal-versions == '^9' }}
+        run: vendor/bin/phpunit tests --coverage-clover=coverage.xml --coverage-filter=src  --colors=always
+      - name: Run test suite
+        if: ${{ matrix.drupal-versions != '^9' }}
+        run: vendor/bin/phpunit tests --coverage-clover=coverage.xml --whitelist=src --colors=always
+
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml

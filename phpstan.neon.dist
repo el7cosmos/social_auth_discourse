@@ -1,6 +1,8 @@
 includes:
   - vendor/phpstan/phpstan-deprecation-rules/rules.neon
   - vendor/phpstan/phpstan-symfony/extension.neon
+  - vendor/phpstan/phpstan-phpunit/extension.neon
+  - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
   level: max
@@ -8,6 +10,7 @@ parameters:
 #    - vendor/mglaman/phpstan-drupal/drupal-autoloader.php
   paths:
     - src
+    - tests
   checkMissingIterableValueType: false
   symfony:
     container_xml_path: service.xml
