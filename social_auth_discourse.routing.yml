@@ -1,0 +1,25 @@
+social_auth_discourse.redirect_to_discourse:
+  path: '/user/login/discourse'
+  defaults:
+    _controller: '\Drupal\social_auth_discourse\Controller\DiscourseAuthController::redirectToProvider'
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
+
+social_auth_discourse.callback:
+  path: '/user/login/discourse/callback'
+  defaults:
+    _controller: '\Drupal\social_auth_discourse\Controller\DiscourseAuthController::callback'
+  requirements:
+    _access: 'TRUE'
+  options:
+    no_cache: TRUE
+
+social_auth_discourse.settings_form:
+  path: '/admin/config/social-api/social-auth/discourse'
+  defaults:
+    _title: 'Social Auth Discourse settings'
+    _form: 'Drupal\social_auth_discourse\Form\DiscourseAuthSettingsForm'
+  requirements:
+    _permission: 'administer social api authentication'

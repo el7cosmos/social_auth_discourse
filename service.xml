@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+  <parameters>
+    <parameter/>
+  </parameters>
+
+  <services>
+    <service id="renderer" class="Drupal\Core\Render\Renderer">
+      <argument type="service" id="?"/>
+      <argument type="service" id="theme.manager"/>
+      <argument type="service" id="plugin.manager.element_info"/>
+      <argument type="service" id="render_placeholder_generator"/>
+      <argument type="service" id="render_cache"/>
+      <argument type="service" id="request_stack"/>
+      <argument type="service" id="?"/>
+    </service>
+
+    <service id="social_auth.data_handler" class="Drupal\social_auth\SocialAuthDataHandler">
+      <argument type="service" id="session"/>
+    </service>
+
+    <service id="social_auth.user_authenticator" class="Drupal\social_auth\User\UserAuthenticator">
+      <argument type="service" id="current_user"/>
+      <argument type="service" id="messenger"/>
+      <argument type="service" id="logger.factory"/>
+      <argument type="service" id="social_auth.user_manager"/>
+      <argument type="service" id="social_auth.data_handler"/>
+      <argument type="service" id="config.factory"/>
+      <argument type="service" id="router.route_provider"/>
+      <argument type="service" id="event_dispatcher"/>
+    </service>
+
+    <service id="social_auth_discourse.manager" class="Drupal\social_auth_discourse\DiscourseAuthManager">
+      <argument type="service" id="config.factory"/>
+      <argument type="service" id="logger.factory"/>
+    </service>
+  </services>
+</container>

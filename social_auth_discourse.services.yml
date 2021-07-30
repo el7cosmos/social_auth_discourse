@@ -1,0 +1,4 @@
+services:
+  social_auth_discourse.manager:
+    class: Drupal\social_auth_discourse\DiscourseAuthManager
+    arguments: ['@config.factory', '@logger.factory']

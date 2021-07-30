@@ -1,0 +1,4 @@
+social_auth_discourse.settings.tab:
+  title: 'Discourse'
+  route_name: social_auth_discourse.settings_form
+  base_route: social_auth.integrations
