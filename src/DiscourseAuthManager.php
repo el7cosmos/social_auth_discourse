@@ -5,7 +5,9 @@ namespace Drupal\social_auth_discourse;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Utility\UnroutedUrlAssemblerInterface;
 use Drupal\social_auth\AuthManager\OAuth2Manager;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -16,8 +18,25 @@ class DiscourseAuthManager extends OAuth2Manager {
 
   protected static string $state;
 
-  public function __construct(ConfigFactoryInterface $configFactory, LoggerChannelFactoryInterface $loggerChannelFactory) {
+  /**
+   * @var \Drupal\Core\Routing\UrlGeneratorInterface
+   */
+  protected UrlGeneratorInterface $urlGenerator;
+
+  /**
+   * @var \Drupal\Core\Utility\UnroutedUrlAssemblerInterface
+   */
+  protected UnroutedUrlAssemblerInterface $unroutedUrlAssembler;
+
+  public function __construct(
+    ConfigFactoryInterface $configFactory,
+    LoggerChannelFactoryInterface $loggerChannelFactory,
+    UrlGeneratorInterface $urlGenerator,
+    UnroutedUrlAssemblerInterface $unroutedUrlAssembler
+  ) {
     parent::__construct($configFactory->get('social_auth_discourse.settings'), $loggerChannelFactory);
+    $this->urlGenerator = $urlGenerator;
+    $this->unroutedUrlAssembler = $unroutedUrlAssembler;
   }
 
   /**
@@ -30,11 +49,14 @@ class DiscourseAuthManager extends OAuth2Manager {
    * {@inheritDoc}
    */
   public function getAuthorizationUrl() {
+    $return_url = Url::fromRoute('social_auth_discourse.callback', [], [
+      'absolute' => TRUE,
+    ]);
+    $return_url->setUrlGenerator($this->urlGenerator);
+
     $payload = [
       'nonce' => $this->getState(),
-      'return_sso_url' => Url::fromRoute('social_auth_discourse.callback', [], [
-        'absolute' => TRUE,
-      ])->toString(),
+      'return_sso_url' => $return_url->toString(),
     ];
 
     $query = http_build_query($payload);
@@ -52,6 +74,7 @@ class DiscourseAuthManager extends OAuth2Manager {
         'sig' => $hex_signature,
       ],
     ]);
+    $url->setUnroutedUrlAssembler($this->unroutedUrlAssembler);
 
     return $url->toString();
   }

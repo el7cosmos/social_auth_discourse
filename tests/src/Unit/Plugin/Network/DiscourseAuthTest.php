@@ -8,12 +8,12 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\social_api\SocialApiException;
 use Drupal\social_auth_discourse\Plugin\Network\DiscourseAuth;
-use PHPUnit\Framework\TestCase;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\social_auth_discourse\Plugin\Network\DiscourseAuth
  */
-class DiscourseAuthTest extends TestCase {
+class DiscourseAuthTest extends UnitTestCase {
 
   /**
    * @covers ::initSdk
