@@ -6,6 +6,7 @@
  https://www.drupal.org/node/2116263 for details.
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="web/core/tests/bootstrap.php"
          colors="true"
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutOutputDuringTests="true"
@@ -40,6 +41,23 @@
     <!-- Example for changing the driver args to webdriver tests MINK_DRIVER_ARGS_WEBDRIVER value: '["chrome", { "chromeOptions": { "w3c": false } }, "http://localhost:4444/wd/hub"]' For using the Firefox browser, replace "chrome" with "firefox" -->
     <env name="MINK_DRIVER_ARGS_WEBDRIVER" value=""/>
   </php>
+  <testsuites>
+    <testsuite name="unit">
+      <file>./web/core/tests/TestSuites/UnitTestSuite.php</file>
+    </testsuite>
+    <testsuite name="kernel">
+      <file>./web/core/tests/TestSuites/KernelTestSuite.php</file>
+    </testsuite>
+    <testsuite name="functional">
+      <file>./web/core/tests/TestSuites/FunctionalTestSuite.php</file>
+    </testsuite>
+    <testsuite name="functional-javascript">
+      <file>./web/core/tests/TestSuites/FunctionalJavascriptTestSuite.php</file>
+    </testsuite>
+    <testsuite name="build">
+      <file>./web/core/tests/TestSuites/BuildTestSuite.php</file>
+    </testsuite>
+  </testsuites>
   <listeners>
     <listener class="\Drupal\Tests\Listeners\DrupalListener">
     </listener>

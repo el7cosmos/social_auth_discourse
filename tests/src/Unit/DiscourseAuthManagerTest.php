@@ -120,13 +120,13 @@ class DiscourseAuthManagerTest extends UnitTestCase {
     $this->secret = $this->getRandomGenerator()->string();
     $this->loggerChannelFactory = $this->createMock(LoggerChannelFactoryInterface::class);
 
+    /** @var \Drupal\Core\Config\ConfigFactoryInterface|\PHPUnit\Framework\MockObject\MockObject $configFactory */
     $configFactory = $this->getConfigFactoryStub([
       'social_auth_discourse.settings' => [
         'url' => self::URL,
         'secret' => $this->secret,
       ],
     ]);
-    assert($configFactory instanceof ConfigFactoryInterface);
 
     $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
     $urlGenerator->method('generateFromRoute')->willReturn(self::URL);

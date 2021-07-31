@@ -12,65 +12,105 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: [7.4]
-        composer-versions: [2]
-        drupal-versions: [^8.8, ^9]
+        php: [ 7.4 ]
+        composer: [ 2 ]
+        drupal: [ ^8.8, ^9 ]
         include:
-          - php-versions: 7.4
-            composer-versions: 1
-            drupal-versions: 8.8.9
-          - php-versions: 7.4
-            composer-versions: 1
-            drupal-versions: ~8.8.9
-          - php-versions: 8.0
-            drupal-versions: ^9
+          - php: 7.4
+            composer: 1
+            drupal: 8.8.9
+          - php: 7.4
+            composer: 1
+            drupal: ~8.8.9
+          - php: 8.0
+            drupal: ^9
+
+    services:
+      database:
+        image: mariadb
+        ports:
+          - 3306:3306
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: yes
+          MARIADB_DATABASE: test
+
+    env:
+      SIMPLETEST_BASE_URL: http://localhost:8888
+      SIMPLETEST_DB: mysql://root@127.0.0.1:3306/test
+      BROWSERTEST_OUTPUT_DIRECTORY: ${{ github.workspace }}/web/sites/simpletest/browser_output
 
     steps:
-      - uses: actions/checkout@v2
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
-
-      - name: Validate composer.json
-        run: composer validate --strict
+          php-version: ${{ matrix.php }}
+          tools: composer:${{ matrix.composer }}
 
       - name: Get composer cache directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "::set-output name=dir::$(composer config cache-files-dir --global)"
 
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ github.run_number }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        run: composer install --no-progress --prefer-dist --ansi
+      - name: Setup Drupal
+        run: |
+          composer create-project drupal/recommended-project:${{ matrix.drupal }} . --no-progress
+          composer require --dev drupal/core-dev:${{ matrix.drupal }} phpstan/phpstan phpstan/phpstan-deprecation-rules phpstan/phpstan-phpunit mglaman/phpstan-drupal --update-with-all-dependencies --no-progress
+          mkdir -p web/sites/simpletest/browser_output
+          chmod -R 777 web/sites/simpletest
 
-      - run: composer update --with drupal/core:${{ matrix.drupal-versions }} --with drupal/core-dev:${{ matrix.drupal-versions }} -W --ansi
+      - name: Add phpspec/prophecy-phpunit
+        if: ${{ matrix.drupal == '^9' }}
+        run: composer require --dev phpspec/prophecy-phpunit:^2
 
-      - run: vendor/bin/phpcs --colors
+      - uses: actions/checkout@v2
+        with:
+          path: module
 
-      - if: ${{ matrix.drupal-versions == '^9' }}
-        run: vendor/bin/phpstan analyse src --no-progress --ansi
-      - if: ${{ matrix.drupal-versions != '^9' }}
-        run: vendor/bin/phpstan --no-progress --ansi
+      - name: Setup config
+        run: |
+          ln -s module/phpcs.xml.dist .
+          ln -s module/phpstan.neon.dist .
+          cp module/phpunit.xml.dist .
 
-#      - name: Run test suite
-#        if: ${{ matrix.drupal-versions == '^9' }}
-#        run: vendor/bin/simple-phpunit tests --coverage-clover=coverage.xml --coverage-filter=src --colors=always
-#        env:
-#          SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT: 1
+      - name: Install module
+        run: |
+          composer config repositories.local path $GITHUB_WORKSPACE/module
+          composer require el7cosmos/social_auth_discourse:dev-main --no-progress
+
+      - name: PHP_CodeSniffer
+        run: vendor/bin/phpcs
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress module/src module/tests
+
+      - name: Start php built-in server
+        run: php -S localhost:8888 .ht.router.php &
+        working-directory: web
+
       - name: Run test suite
-        if: ${{ matrix.drupal-versions != '^9' }}
-        run: vendor/bin/phpunit tests --coverage-clover=coverage.xml --whitelist=src --colors=always
+        if: ${{ matrix.drupal == '^9' }}
+        run: vendor/bin/phpunit --group=social_auth --coverage-clover=../coverage.xml --coverage-filter=web/modules/custom/social_auth_discourse/src
+        env:
+          SYMFONY_DEPRECATIONS_HELPER: disabled
+      - name: Run test suite
+        if: ${{ matrix.drupal != '^9' }}
+        run: vendor/bin/phpunit --group=social_auth --coverage-clover=../coverage.xml --whitelist=web/modules/custom/social_auth_discourse/src
 
+      - name: Archive test output
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          path: web/sites/simpletest/browser_output
 
       - uses: codecov/codecov-action@v2
-        if: ${{ matrix.drupal-versions != '^9' }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
+          files: coverage.xml
+          directory: ${{ github.workspace }}
+          root_dir: ${{ github.workspace }}/module
