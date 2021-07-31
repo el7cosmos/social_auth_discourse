@@ -12,6 +12,9 @@ use Drupal\Tests\UnitTestCase;
 
 /**
  * @coversDefaultClass \Drupal\social_auth_discourse\Plugin\Network\DiscourseAuth
+ *
+ * @group social_auth
+ * @ingroup social_auth_discourse
  */
 class DiscourseAuthTest extends UnitTestCase {
 

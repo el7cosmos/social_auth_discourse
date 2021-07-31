@@ -16,6 +16,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * @coversDefaultClass \Drupal\social_auth_discourse\DiscourseAuthManager
  * @covers ::__construct
+ *
+ * @group social_auth
+ * @ingroup social_auth_discourse
  */
 class DiscourseAuthManagerTest extends UnitTestCase {
 

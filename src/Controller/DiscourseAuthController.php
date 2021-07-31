@@ -161,6 +161,7 @@ final class DiscourseAuthController extends ControllerBase {
         case 'username':
         case 'email':
         case 'external_id':
+        case 'avatar_url':
         case 'nonce':
           return FALSE;
 
