@@ -4,13 +4,16 @@ namespace Drupal\social_auth_discourse\Controller;
 
 use Drupal\Core\Config\Config;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\social_auth\SocialAuthDataHandler;
 use Drupal\social_auth\User\UserAuthenticator;
 use Drupal\social_auth_discourse\DiscourseAuthManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -35,13 +38,18 @@ final class DiscourseAuthController extends ControllerBase {
     Config $config,
     SocialAuthDataHandler $dataHandler,
     RendererInterface $renderer,
-    UserAuthenticator $userAuthenticator
+    UserAuthenticator $userAuthenticator,
+    AccountInterface $currentUser,
+    MessengerInterface $messenger
   ) {
     $this->authManager = $authManager;
     $this->config = $config;
     $this->dataHandler = $dataHandler;
     $this->renderer = $renderer;
     $this->userAuthenticator = $userAuthenticator;
+
+    $this->currentUser = $currentUser;
+    $this->setMessenger($messenger);
 
     // Sets the session prefix.
     $this->dataHandler->setSessionPrefix(self::PLUGIN_ID);
@@ -66,10 +74,16 @@ final class DiscourseAuthController extends ControllerBase {
       $container->get('social_auth.data_handler'),
       $container->get('renderer'),
       $container->get('social_auth.user_authenticator'),
+      $container->get('current_user'),
+      $container->get('messenger')
     );
   }
 
-  public function redirectToProvider(Request $request): TrustedRedirectResponse {
+  public function redirectToProvider(Request $request): RedirectResponse {
+    if ($this->currentUser()->isAuthenticated()) {
+      return $this->redirect('user.login');
+    }
+
     $context = new RenderContext();
 
     /** @var \Drupal\Core\Routing\TrustedRedirectResponse $response */
@@ -118,23 +132,28 @@ final class DiscourseAuthController extends ControllerBase {
    * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
   public function callback(Request $request): RedirectResponse {
+    if ($this->currentUser()->isAuthenticated()) {
+      return $this->redirect('user.login');
+    }
+
     $nonce = $this->dataHandler->get('nonce');
     $this->userAuthenticator->nullifySessionKeys();
 
-    if (!$request->query->has('sso') || !$request->query->has('sig')) {
-      throw new NotFoundHttpException();
-    }
-
-    $sso = $request->query->get('sso');
-    $sig = hash_hmac('sha256', urldecode($sso), $this->config->get('secret'));
-    if (!hash_equals($sig, $request->query->get('sig'))) {
-      throw new AccessDeniedHttpException();
-    }
+    self::checkRequiredQueryParameter($request->query);
+    self::checkSignature($request->query, $this->config->get('secret'));
 
     $info = $this->authManager->getUserInfo($request);
 
     if (empty($info['nonce']) || ($info['nonce'] !== $nonce)) {
       throw new AccessDeniedHttpException();
+    }
+
+    $disabled_groups = $this->config->get('disabled_groups');
+    foreach (explode(',', $info['groups']) as $group) {
+      if (in_array($group, $disabled_groups, FALSE)) {
+        $this->messenger()->addError('User belong to a disabled group.');
+        return $this->redirect('user.login');
+      }
     }
 
     $data = array_filter($info, static function ($key) {
@@ -153,6 +172,20 @@ final class DiscourseAuthController extends ControllerBase {
     $this->userAuthenticator->authenticateUser($info['username'], $info['email'], $info['external_id'], '', $info['avatar_url'], $data);
 
     return $this->redirect('user.login');
+  }
+
+  private static function checkRequiredQueryParameter(ParameterBag $query): void {
+    if (!$query->has('sso') || !$query->has('sig')) {
+      throw new NotFoundHttpException();
+    }
+  }
+
+  private static function checkSignature(ParameterBag $query, string $secret): void {
+    $sso = $query->get('sso');
+    $sig = hash_hmac('sha256', urldecode($sso), $secret);
+    if (!hash_equals($sig, $query->get('sig'))) {
+      throw new AccessDeniedHttpException();
+    }
   }
 
 }

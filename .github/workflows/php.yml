@@ -59,17 +59,18 @@ jobs:
       - if: ${{ matrix.drupal-versions != '^9' }}
         run: vendor/bin/phpstan --no-progress --ansi
 
-      - name: Run test suite
-        if: ${{ matrix.drupal-versions == '^9' }}
-        run: vendor/bin/simple-phpunit tests --coverage-clover=coverage.xml --coverage-filter=src --colors=always
-        env:
-          SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT: 1
+#      - name: Run test suite
+#        if: ${{ matrix.drupal-versions == '^9' }}
+#        run: vendor/bin/simple-phpunit tests --coverage-clover=coverage.xml --coverage-filter=src --colors=always
+#        env:
+#          SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT: 1
       - name: Run test suite
         if: ${{ matrix.drupal-versions != '^9' }}
         run: vendor/bin/phpunit tests --coverage-clover=coverage.xml --whitelist=src --colors=always
 
 
       - uses: codecov/codecov-action@v2
+        if: ${{ matrix.drupal-versions != '^9' }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml

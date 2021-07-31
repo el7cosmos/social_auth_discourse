@@ -9,14 +9,21 @@
   </parameters>
 
   <services>
+    <service id="current_user" class="Drupal\Core\Session\AccountProxy"/>
+
+    <service id="messenger" class="Drupal\Core\Messenger\Messenger">
+      <argument type="service" id="session.flash_bag"/>
+      <argument type="service" id="page_cache_kill_switch"/>
+    </service>
+
     <service id="renderer" class="Drupal\Core\Render\Renderer">
-      <argument type="service" id="?"/>
+      <argument type="service" id="controller_resolver"/>
       <argument type="service" id="theme.manager"/>
       <argument type="service" id="plugin.manager.element_info"/>
       <argument type="service" id="render_placeholder_generator"/>
       <argument type="service" id="render_cache"/>
       <argument type="service" id="request_stack"/>
-      <argument type="service" id="?"/>
+      <argument>%renderer.config%</argument>
     </service>
 
     <service id="social_auth.data_handler" class="Drupal\social_auth\SocialAuthDataHandler">
