@@ -1,0 +1,16 @@
+social_auth_discourse.settings:
+  type: config_object
+  label: 'Social Auth Discourse settings'
+  mapping:
+    url:
+      type: uri
+      label: 'Discourse URL'
+    secret:
+      type: string
+      label: 'Secret'
+    disabled_groups:
+      type: sequence
+      label: 'Disabled groups'
+      nullable: true
+      sequence:
+        type: string
