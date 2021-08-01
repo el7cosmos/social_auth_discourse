@@ -47,7 +47,7 @@ class DiscourseAuthSettingsForm extends SocialAuthSettingsForm {
       '#type' => 'textfield',
       '#title' => $this->t('Disable Discourse login for the following Discourse groups'),
       '#description' => $this->t('Enter comma separated value of discourse groups. This groups will not be able login to drupal site.'),
-      '#default_value' => implode(',', $config->get('disabled_groups')),
+      '#default_value' => implode(',', $config->get('disabled_groups') ?? []),
     ];
 
     return parent::buildForm($form, $form_state);

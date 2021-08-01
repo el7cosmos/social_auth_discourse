@@ -27,8 +27,14 @@
             "Drupal\\social_api\\": "vendor/drupal/social_api/src/",
             "Drupal\\social_auth\\": "vendor/drupal/social_auth/src/",
             "Drupal\\Tests\\": "vendor/drupal/core/tests/Drupal/Tests",
+            "Drupal\\FunctionalTests\\": "vendor/drupal/core/tests/Drupal/FunctionalTests",
             "Drupal\\KernelTests\\": "vendor/drupal/core/tests/Drupal/KernelTests",
-            "Drupal\\TestTools\\": "vendor/drupal/core/tests/Drupal/TestTools"
+            "Drupal\\TestTools\\": "vendor/drupal/core/tests/Drupal/TestTools",
+            "Drupal\\Tests\\block\\": "vendor/drupal/core/modules/block/tests/src",
+            "Drupal\\Tests\\node\\": "vendor/drupal/core/modules/node/tests/src",
+            "Drupal\\Tests\\user\\": "vendor/drupal/core/modules/user/tests/src",
+            "Drupal\\Tests\\social_api\\": "vendor/drupal/social_api/tests/src",
+            "Drupal\\Tests\\social_auth\\": "vendor/drupal/social_auth/tests/src"
         }
     },
     "minimum-stability": "stable",
