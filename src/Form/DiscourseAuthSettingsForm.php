@@ -50,24 +50,14 @@ class DiscourseAuthSettingsForm extends SocialAuthSettingsForm {
       '#default_value' => implode(',', $config->get('disabled_groups') ?? []),
     ];
 
+    $form['discourse_settings']['user_login_form_link'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Login with discourse link'),
+      '#description' => $this->t('Add login with discourse link to user login form'),
+      '#default_value' => $config->get('user_login_form_link') ?? TRUE,
+    ];
+
     return parent::buildForm($form, $form_state);
-  }
-
-  /**
-   * Callback for both ajax-enabled buttons.
-   */
-  public function addmoreCallback(array $form): array {
-    return $form['discourse_settings']['disabled_groups'];
-  }
-
-  /**
-   * Submit handler for the "add-one-more" button.
-   */
-  public function addOne(array &$form, FormStateInterface $form_state): void {
-    $disabled_groups = $form_state->get('disabled_groups');
-    $disabled_groups[] = '';
-    $form_state->set('disabled_groups', $disabled_groups);
-    $form_state->setRebuild();
   }
 
   /**
@@ -80,6 +70,7 @@ class DiscourseAuthSettingsForm extends SocialAuthSettingsForm {
     $config->set('url', $form_state->getValue('url'));
     $config->set('secret', $form_state->getValue('secret'));
     $config->set('disabled_groups', array_map(static fn($group) => trim($group), $disabled_groups));
+    $config->set('user_login_form_link', $form_state->getValue('user_login_form_link'));
     $config->save();
 
     parent::submitForm($form, $form_state);

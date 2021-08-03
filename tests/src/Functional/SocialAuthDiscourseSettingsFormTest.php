@@ -35,7 +35,7 @@ class SocialAuthDiscourseSettingsFormTest extends SocialAuthTestBase {
    * Test if implementer is shown in the integration list.
    */
   public function testIsAvailableInIntegrationList(): void {
-    $this->fields = ['url', 'secret', 'disabled_groups'];
+    $this->fields = ['url', 'secret', 'disabled_groups', 'user_login_form_link'];
 
     $this->checkIsAvailableInIntegrationList();
   }
@@ -52,6 +52,8 @@ class SocialAuthDiscourseSettingsFormTest extends SocialAuthTestBase {
 
   /**
    * Test settings form submission.
+   *
+   * @throws \Exception
    */
   public function testSettingsFormSubmission(): void {
     $this->edit = [
@@ -61,6 +63,7 @@ class SocialAuthDiscourseSettingsFormTest extends SocialAuthTestBase {
         $this->randomString(),
         $this->randomString(),
       ]),
+      'user_login_form_link' => (bool) random_int(0, 1),
     ];
 
     $this->checkSettingsFormSubmission();

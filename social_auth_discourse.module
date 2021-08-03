@@ -8,3 +8,23 @@
  * This file is no longer required in Drupal 8.
  * @see https://www.drupal.org/node/2217931
  */
+
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function social_auth_discourse_form_user_login_form_alter(array &$form): void {
+  $link = \Drupal::config('social_auth_discourse.settings')->get('user_login_form_link') ?? TRUE;
+  if ($link) {
+    $form['actions']['discourse'] = [
+      '#type' => 'link',
+      '#title' => new TranslatableMarkup('Log in with Discourse'),
+      '#url' => Url::fromRoute('social_auth_discourse.redirect_to_discourse'),
+      '#attributes' => [
+        'class' => ['button'],
+      ],
+    ];
+  }
+}
