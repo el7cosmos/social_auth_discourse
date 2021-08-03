@@ -2,9 +2,9 @@ name: PHP Composer
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -81,7 +81,7 @@ jobs:
       - name: Install module
         run: |
           composer config repositories.local path $GITHUB_WORKSPACE/module
-          composer require el7cosmos/social_auth_discourse:dev-main --no-progress
+          composer require el7cosmos/social_auth_discourse:dev-master --no-progress
 
       - name: PHP_CodeSniffer
         run: vendor/bin/phpcs
