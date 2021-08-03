@@ -40,6 +40,7 @@ class DiscourseAuthSettingsForm extends SocialAuthSettingsForm {
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => $this->t('Secret'),
+      '#description' => $this->t('Enter the same value as discourse connect provider secrets in Discourse login settings.'),
       '#default_value' => $config->get('secret'),
     ];
 
