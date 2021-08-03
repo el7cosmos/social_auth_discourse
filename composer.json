@@ -47,6 +47,11 @@
     "config": {
         "sort-packages": true
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "main"
+        }
+    },
     "archive": {
         "exclude": ["/.github"]
     }
