@@ -95,12 +95,12 @@ jobs:
 
       - name: Run test suite
         if: ${{ matrix.drupal == '^9' }}
-        run: vendor/bin/phpunit --group=social_auth --coverage-clover=../coverage.xml --coverage-filter=web/modules/custom/social_auth_discourse/src
+        run: vendor/bin/phpunit --group=social_auth --coverage-clover=$GITHUB_WORKSPACE/module/coverage.xml --coverage-filter=web/modules/custom/social_auth_discourse/src
         env:
           SYMFONY_DEPRECATIONS_HELPER: disabled
       - name: Run test suite
         if: ${{ matrix.drupal != '^9' }}
-        run: vendor/bin/phpunit --group=social_auth --coverage-clover=../coverage.xml --whitelist=web/modules/custom/social_auth_discourse/src
+        run: vendor/bin/phpunit --group=social_auth --coverage-clover=$GITHUB_WORKSPACE/module/coverage.xml --whitelist=web/modules/custom/social_auth_discourse/src
 
       - name: Archive test output
         if: failure()
@@ -112,5 +112,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
-          directory: ${{ github.workspace }}
-          root_dir: ${{ github.workspace }}/module
+          working-directory: ${{ github.workspace }}/module
