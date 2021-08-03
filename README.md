@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/el7cosmos/social_auth_discourse/branch/main/graph/badge.svg?token=lkC0Ugf1t6)](https://codecov.io/gh/el7cosmos/social_auth_discourse)
+
 ## INSTALLATION
 
 ### Configure composer authentication
