@@ -2,7 +2,7 @@
     "name": "el7cosmos/social_auth_discourse",
     "description": "Social Auth integration for Discourse",
     "type": "drupal-custom-module",
-    "license": "proprietary",
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "el7cosmos",
