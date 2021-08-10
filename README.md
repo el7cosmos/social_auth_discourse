@@ -2,16 +2,6 @@
 
 ## INSTALLATION
 
-### Configure composer authentication
-```shell
-composer config --global --auth http-basic.el7cosmos.repo.repman.io <token>
-```
-
-### Add composer repository
-```shell
-composer config repositories.el7cosmos composer https://el7cosmos.repo.repman.io
-```
-
 ### Add module to composer requirements
 ```shell
 composer require el7cosmos/social_auth_discourse
